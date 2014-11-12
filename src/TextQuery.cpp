@@ -1,9 +1,46 @@
 #include "TextQuery.h"
+#include "StringUtil.h"
 #include <fstream>
 #include <stdexcept>
 #include <muduo/base/Logging.h>
+#include <vector>
+#include <queue>
 
 using namespace std;
+using namespace stringutil;
+
+namespace
+{
+
+struct Word
+{
+    public:
+        Word(string word,
+             int editDistance,
+             int frequency)
+            :word_(move(word)),
+             editDistance_(editDistance),
+             frequency_(frequency)
+         {
+    
+         }
+
+    public:
+        string word_;
+        int editDistance_;
+        int frequency_;
+};
+
+bool operator<(const Word &a, const Word &b)
+{
+    if(a.editDistance_ != b.editDistance_)
+        return a.editDistance_ > b.editDistance_;
+
+    return a.frequency_ < b.frequency_;
+}
+
+}
+
 
 TextQuery::TextQuery(string enDictName)
     :enDictName_(move(enDictName))
@@ -38,5 +75,17 @@ void TextQuery::readEnDict()
 
 string TextQuery::queryWord(const string &word) const
 {
-    return "";    
+    priority_queue<Word, vector<Word>, less<Word> > q;
+    LOG_DEBUG << "query word: " << word;
+
+    for(const auto &pa : enDict_)
+    {
+        int edit = editDistance(word, pa.first);
+        q.push(Word(pa.first, edit, pa.second)); 
+    }
+
+    return q.top().word_;
 }
+
+
+

@@ -6,9 +6,15 @@
  ************************************************************************/
 
 #include "TextQuery.h"
-using namespace std;
+#include <iostream>
 
 int main (int argc, char *argv[])
 {
     TextQuery query("../dict/en.dict");
+
+    std::string word;
+    while(std::cin >> word)
+    {
+        std::cout << query.queryWord(word) << std::endl;  
+    }
 }
