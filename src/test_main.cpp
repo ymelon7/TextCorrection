@@ -7,10 +7,15 @@
 
 #include "TextQuery.h"
 #include <iostream>
+#include <muduo/base/Logging.h>
+
+using namespace muduo;
 
 int main (int argc, char *argv[])
 {
-    TextQuery query("../dict/en.dict");
+    Logger::setLogLevel(Logger::DEBUG); //设置日志打印级别
+
+    TextQuery query("../dict/en.dict", "../dict/ch.dict");
 
     std::string word;
     while(std::cin >> word)

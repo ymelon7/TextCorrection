@@ -8,13 +8,15 @@
 class TextQuery : boost::noncopyable
 {
     public:
-        TextQuery(std::string enDictName);
+        TextQuery(std::string enDictName, std::string chDictName);
         std::string queryWord(const std::string &word) const;
 
     private:
         void readEnDict();   //read english dict       
+        void readChDict();   //read chinese dict
 
         std::string enDictName_;    //en dict file
+        std::string chDictName_;    //ch dict file
         std::unordered_map<std::string, int> enDict_;   //en dict
 };
 

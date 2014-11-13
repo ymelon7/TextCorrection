@@ -1,10 +1,10 @@
 #include "TextQuery.h"
 #include "StringUtil.h"
 #include <fstream>
-#include <stdexcept>
 #include <muduo/base/Logging.h>
 #include <vector>
 #include <queue>
+#include <limits>
 
 using namespace std;
 using namespace stringutil;
@@ -31,6 +31,7 @@ struct Word
         int frequency_;
 };
 
+
 bool operator<(const Word &a, const Word &b)
 {
     if(a.editDistance_ != b.editDistance_)
@@ -42,18 +43,22 @@ bool operator<(const Word &a, const Word &b)
 }
 
 
-TextQuery::TextQuery(string enDictName)
-    :enDictName_(move(enDictName))
+TextQuery::TextQuery(string enDictName, string chDictName)
+    :enDictName_(move(enDictName)),
+     chDictName_(move(chDictName))
 {
    readEnDict();
+   readChDict();
 }
 
 void TextQuery::readEnDict()
 {
     ifstream in(enDictName_.c_str());
     if(!in)
-        throw runtime_error("read en dict fail");
+        LOG_FATAL << "open endict failed";
     
+    LOG_INFO << "Begin reading endict";
+
     string word;
     int count = 0;
     while(in >> word >> count)
@@ -66,12 +71,54 @@ void TextQuery::readEnDict()
     }
   
     if(!in.eof())   //check if enDict file format error
-        throw runtime_error("enDict Format error");
+        LOG_FATAL << "enDict Format error";
     
     LOG_INFO << "read enDict over";
 
     in.close();
 }
+
+
+void TextQuery::readChDict()
+{
+    ifstream in(chDictName_);
+    if(!in)
+    {
+        LOG_FATAL << "open chdict fjle erroe";
+    }
+
+    LOG_INFO << "Begin reading chdict" << chDictName_;
+
+    string word;
+    int count;
+    int lines = 0;
+    while(in >> word >> count, !in.eof())
+    {
+        if(in.fail())
+        {
+            in.clear();  //重置状态
+            in.ignore(numeric_limits <streamsize> ::max(), '\n');
+        }
+        lines ++;
+        
+        //这里把中文也和英文一样放到同一个map中
+        pair<unordered_map<string, int>::iterator, bool> ret = 
+            enDict_.insert(make_pair(word, count));
+        assert(ret.second); (void)ret; 
+    }
+
+    LOG_DEBUG << "read chdict: " << lines << "lines";
+
+    if(!in.eof())  //判断是否是文件格式错误
+    {
+        LOG_FATAL << "file format error";
+    }
+    
+    LOG_INFO << "read chDict finished";
+
+    in.close();
+}
+
 
 string TextQuery::queryWord(const string &word) const
 {

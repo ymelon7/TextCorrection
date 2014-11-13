@@ -28,6 +28,43 @@ int getLenOfUTF8(unsigned char c)
     return cnt;
 }
 
+
+int editDistanceUint_32(const vector<uint32_t> &w1,
+                        const vector<uint32_t> &w2)
+{
+    int len_a = w1.size();
+    int len_b = w2.size();
+
+    int memo[100][100];
+    memset(memo, 0, sizeof memo);
+
+    for(int i = 0; i <= len_a; i ++)
+        memo[i][0] = i;
+    for(int j = 0; j <= len_b; j ++)
+        memo[0][j] = j;
+
+    for(int i = 1; i <= len_a; i ++)
+    {
+        for(int j = 1; j <= len_b; j ++)
+        {
+            if(w1[i - 1] == w2[j - 1])
+            {
+                memo[i][j] = memo[i - 1][j - 1];
+            }
+            else
+            {
+                int t1 = memo[i - 1][j];
+                int t2 = memo[i][j - 1];
+                int t3 = memo[i - 1][j - 1];
+                
+                memo[i][j] = minThribble(t1, t2, t3) + 1;
+            } 
+        } 
+    }
+
+    return memo[len_a][len_b];
+}
+
 }
 
 
@@ -73,6 +110,7 @@ void stringToLower(string &word)
 }
 
 
+//原始的英文单词编辑距离计算
 int editDistanceStr(const string &a, const string &b)
 {
     assert(a.size() < 100 && b.size() < 100);        
@@ -120,7 +158,7 @@ void parseUTF8String(const string &s, vector<uint32_t> &vec)
         int len = getLenOfUTF8(s[ix]);
         uint32_t t = (unsigned char)s[ix]; //e5 ?
 
-        if(t > 1)
+        if(len > 1)
         {
             len --;
             //拼接剩余的字节
@@ -135,41 +173,6 @@ void parseUTF8String(const string &s, vector<uint32_t> &vec)
 }
 
 
-int editDistanceUint_32(const vector<uint32_t> &w1,
-                        const vector<uint32_t> &w2)
-{
-    int len_a = w1.size();
-    int len_b = w2.size();
-
-    int memo[100][100];
-    memset(memo, 0, sizeof memo);
-
-    for(size_t i = 0; i <= len_a; i ++)
-        memo[i][0] = i;
-    for(size_t j = 0; j <= len_b; j ++)
-        memo[0][j] = j;
-
-    for(size_t i = 1; i <= len_a; i ++)
-    {
-        for(size_t j = 1; j <= len_b; j ++)
-        {
-            if(w1[i - 1] == w2[j - 1])
-            {
-                memo[i][j] = memo[i - 1][j - 1];
-            }
-            else
-            {
-                int t1 = memo[i - 1][j];
-                int t2 = memo[i][j - 1];
-                int t3 = memo[i - 1][j - 1];
-                
-                memo[i][j] = minThribble(t1, t2, t3) + 1;
-            } 
-        } 
-    }
-
-    return memo[len_a][len_b];
-}
 
 int editDistance(const string &a, const string &b)
 {
@@ -183,18 +186,5 @@ int editDistance(const string &a, const string &b)
 
     return  ret;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
