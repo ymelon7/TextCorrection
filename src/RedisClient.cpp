@@ -7,7 +7,25 @@
 #include "RedisClient.h"
 #include <string.h>
 #include <muduo/base/Logging.h>
+#include <memory>
+
 using namespace muduo;
+
+struct Delete    //删除器，用于后面的智能指针
+{
+public:
+    Delete() {}
+    Delete(const Delete &d) {}
+    Delete(Delete &d) {}
+    Delete(Delete &&d) {}
+    ~Delete() {}
+
+   void operator() (redisReply *reply) const
+    {
+        freeReplyObject(reply);
+    }
+};
+
 
 RedisClient::RedisClient(const std::string &host, uint16_t port = 6379)
 {
@@ -36,34 +54,31 @@ void RedisClient::setKeyValue(const std::string &key, const std::string &value)
     LOG_DEBUG << "Redis setKeyValue key: " << key 
                << " value: " << value;
 
-    redisReply *reply = static_cast<redisReply*>
-                        (redisCommand
-                         (connect_, "set %s %s", key.c_str(), value.c_str()));  
-
-    freeReplyObject(reply);
+    std::unique_ptr<redisReply, Delete> reply(
+                                              static_cast<redisReply *>(
+                                              redisCommand
+                                              (connect_, "get %s", key.c_str())),
+                                              Delete());
 }
 
 
 std::pair<std::string, bool> RedisClient::getValueByKey(const std::string &key)
 {  
     LOG_DEBUG << "Redis getValueByKey key: " << key;
+    
+    std::unique_ptr<redisReply, Delete> reply(
+                                              static_cast<redisReply *>(
+                                              redisCommand
+                                              (connect_, "get %s", key.c_str())),
+                                              Delete());
 
-    redisReply *reply = static_cast<redisReply*>
-                        (redisCommand
-                         (connect_, "get %s", key.c_str()));
-
-    std::pair<std::string, bool> ret;
     if(reply->type == REDIS_REPLY_NIL)
     {
-        ret.second = false;
         LOG_DEBUG << "Redis getValueByKey key: " << key << " key is not exists";
+        return make_pair(std::string(""), false);
     }else
     {
-        ret.second = true;
-        ret.first = reply->str;
-        LOG_DEBUG << "Redis getValueByKey key: " << key << " value: " << ret.first;
+        LOG_DEBUG << "Redis getValueByKey key: " << key << " value: " << reply->str;
+        return make_pair(std::string(reply->str), true);
     }
-
-    freeReplyObject(reply);
-    return ret;
 }
