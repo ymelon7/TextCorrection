@@ -16,8 +16,9 @@ class RedisClient : boost::noncopyable
  public:
     RedisClient(const std::string &host, uint16_t port);
     ~RedisClient();
-    void setKeyValue(const std::string &key, const std::string &value);
-    std::pair<std::string, bool> getValueByKey(const std::string &key);
+
+    void setKeyValue(const std::string &key, const std::string &value) const;
+    std::pair<std::string, bool> getValueByKey(const std::string &key) const;
 
  private:
     redisContext *connect_;

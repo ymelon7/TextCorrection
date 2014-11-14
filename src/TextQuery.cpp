@@ -43,9 +43,13 @@ bool operator<(const Word &a, const Word &b)
 }
 
 
-TextQuery::TextQuery(string enDictName, string chDictName)
+TextQuery::TextQuery(string enDictName, 
+                     string chDictName,
+                     const string &host,
+                     uint16_t port)
     :enDictName_(move(enDictName)),
-     chDictName_(move(chDictName))
+     chDictName_(move(chDictName)),
+     client_(host, port)
 {
    readEnDict();
    readChDict();
@@ -63,11 +67,17 @@ void TextQuery::readEnDict()
     int count = 0;
     while(in >> word >> count)
     {
-       pair<unordered_map<string, int>::iterator, bool> ret =
-           enDict_.insert(make_pair(word, count));
-       assert(ret.second);  //ensure insert success
-       (void)ret;     //to remove compile worning
-    
+        if(in.fail())  //处理错误
+        {
+            LOG_WARN << "En dict file format error in: " << enDictName_;
+            in.clear();
+            in.ignore(numeric_limits<streamsize> ::max(), '\n');
+        }
+
+        pair<unordered_map<string, int>::iterator, bool> ret =
+             enDict_.insert(make_pair(word, count));
+        assert(ret.second);  //ensure insert success
+        (void)ret;     //to remove compile worning 
     }
   
     if(!in.eof())   //check if enDict file format error
@@ -96,6 +106,7 @@ void TextQuery::readChDict()
     {
         if(in.fail())
         {
+            LOG_WARN << "Ch file format error in: " << chDictName_;
             in.clear();  //重置状态
             in.ignore(numeric_limits <streamsize> ::max(), '\n');
         }
@@ -122,17 +133,33 @@ void TextQuery::readChDict()
 
 string TextQuery::queryWord(const string &word) const
 {
-    priority_queue<Word, vector<Word>, less<Word> > q;
-    LOG_DEBUG << "query word: " << word;
+    //先查看缓存
+    pair<string, bool> res = client_.getValueByKey(word);
 
-    for(const auto &pa : enDict_)
+    if(res.second)
     {
-        int edit = editDistance(word, pa.first);
-        q.push(Word(pa.first, edit, pa.second)); 
-    }
+        return res.first;
+    }else
+    {
+        string s = queryWordInDict(word);
 
-    return q.top().word_;
+        client_.setKeyValue(word, s);
+        return s;
+    }
 }
 
 
+string TextQuery::queryWordInDict(const string &word) const
+{
+   LOG_DEBUG << "query word: " << word;
 
+   priority_queue<Word, vector<Word>, less<Word> > q;
+
+   for(const auto &pa : enDict_)
+   {
+        int editdistance = editDistance(word, pa.first);
+        q.push(Word(pa.first, editdistance, pa.second));
+   }
+
+    return q.top().word_;
+}

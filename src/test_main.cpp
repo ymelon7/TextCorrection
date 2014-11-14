@@ -15,7 +15,9 @@ int main (int argc, char *argv[])
 {
     Logger::setLogLevel(Logger::DEBUG); //设置日志打印级别
 
-    TextQuery query("../dict/en.dict", "../dict/ch.dict");
+    TextQuery query("../dict/en.dict", 
+                    "../dict/ch.dict",
+                    "localhost", 6379);
 
     std::string word;
     while(std::cin >> word)

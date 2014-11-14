@@ -49,7 +49,7 @@ RedisClient::~RedisClient()
 }
 
 
-void RedisClient::setKeyValue(const std::string &key, const std::string &value)
+void RedisClient::setKeyValue(const std::string &key, const std::string &value) const
 {
     LOG_DEBUG << "Redis setKeyValue key: " << key 
                << " value: " << value;
@@ -62,7 +62,7 @@ void RedisClient::setKeyValue(const std::string &key, const std::string &value)
 }
 
 
-std::pair<std::string, bool> RedisClient::getValueByKey(const std::string &key)
+std::pair<std::string, bool> RedisClient::getValueByKey(const std::string &key) const
 {  
     LOG_DEBUG << "Redis getValueByKey key: " << key;
     
