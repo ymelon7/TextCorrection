@@ -110,8 +110,8 @@ void stringToLower(string &word)
 }
 
 
-//原始的英文单词编辑距离计算
-int editDistanceStr(const string &a, const string &b)
+//原始的英文单词编辑距离计算,计算字节编辑距离
+int editDistanceChar(const string &a, const string &b)
 {
     assert(a.size() < 100 && b.size() < 100);        
 

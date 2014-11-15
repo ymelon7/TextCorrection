@@ -13,7 +13,7 @@ namespace stringutil
     int editDistance(const std::string &a, const std::string &b);
 
     void parseUTF8String(const std::string &s, std::vector<uint32_t> &vec);
-    int editDistanceStr(const std::string &a, const std::string &b);
+    int editDistanceChar(const std::string &a, const std::string &b);
 }
 
 

@@ -5,3 +5,4 @@ ch.dict
 *.o
 *.swp
 *.exe
+*.rdb
