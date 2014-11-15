@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <boost/noncopyable.hpp>
 #include "RedisClient.h"
+#include "InvertedIndex.h"
 
 class TextQuery : boost::noncopyable
 {
@@ -25,7 +26,8 @@ class TextQuery : boost::noncopyable
         std::string enDictName_;    //en dict file
         std::string chDictName_;    //ch dict file
 
-        std::unordered_map<std::string, int> enDict_;   //en dict
+       // std::unordered_map<std::string, int> enDict_;   //en dict
+        InvertedIndex index_; //倒排索引
 
         RedisClient client_;   //redis
 };

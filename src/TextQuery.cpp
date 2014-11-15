@@ -74,10 +74,7 @@ void TextQuery::readEnDict()
             in.ignore(numeric_limits<streamsize> ::max(), '\n');
         }
 
-        pair<unordered_map<string, int>::iterator, bool> ret =
-             enDict_.insert(make_pair(word, count));
-        assert(ret.second);  //ensure insert success
-        (void)ret;     //to remove compile worning 
+        index_.addItem(make_pair(word, count));
     }
   
     if(!in.eof())   //check if enDict file format error
@@ -112,10 +109,7 @@ void TextQuery::readChDict()
         }
         lines ++;
         
-        //这里把中文也和英文一样放到同一个map中
-        pair<unordered_map<string, int>::iterator, bool> ret = 
-            enDict_.insert(make_pair(word, count));
-        assert(ret.second); (void)ret; 
+        index_.addItem(make_pair(word, count));
     }
 
     LOG_DEBUG << "read chdict: " << lines << "lines";
@@ -155,7 +149,8 @@ string TextQuery::queryWordInDict(const string &word) const
 
    priority_queue<Word, vector<Word>, less<Word> > q;
 
-   for(const auto &pa : enDict_)
+   InvertedIndex::WordSet words = index_.getWords(word);
+   for(const auto &pa : words)
    {
         int editdistance = editDistance(word, pa.first);
         q.push(Word(pa.first, editdistance, pa.second));
