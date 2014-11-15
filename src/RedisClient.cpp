@@ -75,9 +75,9 @@ std::pair<std::string, bool> RedisClient::getValueByKey(const std::string &key) 
     if(reply->type == REDIS_REPLY_STRING)
     {
         LOG_DEBUG << "Redis getValueByKey, key: " << key << " value: " << reply->str;
-        return make_pair(std::string(reply-str), true);
+        return make_pair(std::string(reply->str), true);
     }
-    else if(reply-type ==REDIS_REPLY_NIL)
+    else if(reply->type ==REDIS_REPLY_NIL)
     {
         LOG_DEBUG << "Redis getValueByKey, key: " << key << " key is not exist";
         return make_pair(std::string(""), false);
