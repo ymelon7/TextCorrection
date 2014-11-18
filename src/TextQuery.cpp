@@ -133,7 +133,8 @@ string TextQuery::queryWord(const string &word) const
     if(res.second)
     {
         return res.first;
-    }else
+    }
+    else
     {
         string s = queryWordInDict(word);
 
@@ -153,8 +154,16 @@ string TextQuery::queryWordInDict(const string &word) const
    for(const auto &pa : words)
    {
         int editdistance = editDistance(word, pa.first);
-        q.push(Word(pa.first, editdistance, pa.second));
+        if(static_cast<double>(editdistance) / word.size() < 0.5)
+        {
+            q.push(Word(pa.first, editdistance, pa.second)); 
+        }
    }
-
-    return q.top().word_;
+   
+   if(q.empty())
+   {
+       return string("");
+   }
+   else
+       return q.top().word_;
 }
