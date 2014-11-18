@@ -14,6 +14,7 @@ namespace stringutil
 
     void parseUTF8String(const std::string &s, std::vector<uint32_t> &vec);
     int editDistanceChar(const std::string &a, const std::string &b);
+    bool isASCIIString(const std::string &s);
 }
 
 

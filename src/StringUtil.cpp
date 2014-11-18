@@ -187,4 +187,17 @@ int editDistance(const string &a, const string &b)
     return  ret;
 }
 
+
+bool isASCIIString(const string &s)
+{
+    for(char c : s)
+    {
+        if(!isascii(c))
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
 }

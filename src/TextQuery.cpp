@@ -149,11 +149,24 @@ string TextQuery::queryWordInDict(const string &word) const
    LOG_DEBUG << "query word: " << word;
 
    priority_queue<Word, vector<Word>, less<Word> > q;
-
+   
    InvertedIndex::WordSet words = index_.getWords(word);
+   bool isASCII = isASCIIString(word);
+
    for(const auto &pa : words)
    {
-        int editdistance = editDistance(word, pa.first);
+        int editdistance = 0;
+
+        if(isASCII)
+        {
+            editdistance = editDistanceChar(word, pa.first);
+        }
+        else
+        {
+            editdistance = editDistance(word, pa.first);
+        }
+
+
         if(static_cast<double>(editdistance) / word.size() < 0.5)
         {
             q.push(Word(pa.first, editdistance, pa.second)); 
