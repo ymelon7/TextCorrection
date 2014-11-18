@@ -4,13 +4,12 @@
 	> Mail:ymelon7@gmail.com 
 	> Created Time: Fri 31 Oct 2014 04:10:38 AM PDT
  ************************************************************************/
-
-#include "TextQuery.h"
-#include <iostream>
+#include "QueryServer.h"
 #include <muduo/base/Logging.h>
 #include <muduo/base/Timestamp.h>
 
 using namespace muduo;
+using namespace muduo::net;
 
 int main (int argc, char *argv[])
 {
@@ -20,15 +19,14 @@ int main (int argc, char *argv[])
                     "../dict/ch.dict",
                     "localhost", 6379);
 
-    std::string word;
-    while(std::cin >> word)
-    {
-        Timestamp t1(Timestamp::now());
-
-        std::cout << query.queryWord(word) << std::endl;  
-
-        Timestamp t2(Timestamp::now());
-
-        std::cout << "query cost time: "<< timeDifference(t2, t1) << " s" << std::endl;
-    }
+    EventLoop loop;
+    InetAddress addr("localhost", 9981);
+    QueryServer server("../dict/en.dict",
+                       "../dict/ch.dict",
+                       "localhost", 6379,
+                       &loop,
+                       addr);
+    
+    server.start();
+    loop.loop();
 }
