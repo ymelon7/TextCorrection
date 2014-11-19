@@ -5,7 +5,7 @@ BIN=query.exe
 TEST= test_redis.exe
 OBJS=test_main.o StringUtil.o TextQuery.o RedisClient.o InvertedIndex.o QueryServer.o
 STAND= -std=c++0x
-LINKS=-lmuduo_base -lmuduo_net -lpthread -lhiredis
+LINKS=-lmuduo_net -lmuduo_base_cpp11 -lmuduo_base -lpthread -lhiredis
 $(BIN):$(OBJS)
 		$(CC) $(CFLAGS) $^ -o $@ $(LINKS)
 test:$(TEST)
